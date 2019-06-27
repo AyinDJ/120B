@@ -33,8 +33,8 @@ int main(void) {
 	tempA = PINA;
 	tempB = PINB;
 	tempC = PINC;
-	tempD = PIND;
-
+	tempD = 0x00;;
+	total = tempA + tempB + tempC;
 	if(total>0x008C){
 		tempD = tempD|0x01;
 	}
