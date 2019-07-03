@@ -1,7 +1,7 @@
-Breakpoint 1 at 0x1d6: file source/main.c, line 26.
+Breakpoint 1 at 0x33e: file source/main.c, line 47.
 Note: automatically using hardware breakpoints for read-only addresses.
 ======================================================
 Running all tests..."
 
-"Push # then take X"..."Push X Y X Y"..."push # then lock inside"..."push # then take X and Y togeter"..."Unlock"...======================================================
+"3 loop to led1 then 6 loop led3"..."1 loop to led1 then 1 loop led3 then 1 loop led2"..."stop"..."reset"..."led2"...======================================================
 Quitting: Remote doesn't know how to detach

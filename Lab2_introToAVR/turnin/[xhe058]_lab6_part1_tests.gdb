@@ -42,26 +42,14 @@ continue 1
 expectPORTB 0x02
 checkResult
 
-test "stop"
-setPINA 0xFE
+test "led3"
 continue 1
-expectPORTB 0X02
-setPINA 0xFF
-continue 3
-expectPORTB 0X02
-continue 2
-expectPORTB 0X02
+expectPORTB 0X04
 checkResult
 
-test "reset"
-setPINA 0xFE
-continue 2
-expectPORTB 0X02
-setPINA 0xFF
-continue 2
-expectPORTB 0X02
+test "led1"
 continue 1
-expectPORTB 0X02
+expectPORTB 0X01
 checkResult
 
 test "led2"
