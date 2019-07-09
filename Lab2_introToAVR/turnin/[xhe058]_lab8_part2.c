@@ -31,19 +31,16 @@ void ADC_init();
 
 //unsigned char i = 0x00;
 //unsigned char c = '0';
-//unsigned short AD_convert = 0x00;	
-unsigned short MAX = 0xFF;
-unsigned short temp = 0x00;
-
+unsigned short AD_convert = 0x00;	
 
 int main(void) {
     /* Insert DDR and PORT initializations */
     DDRA = 0x00;
 	DDRB = 0xFF;
-	//DDRD = 0xFF;
+	DDRD = 0xFF;
 	PORTA = 0xFF;
 	PORTB = 0x00;
-	//PORTD = 0x00;
+	PORTD = 0x00;
 	
 	ADC_init();
 	//LCD_init();
@@ -60,27 +57,11 @@ int main(void) {
 	//PORTB = tmpB;
 	
 	while (1) {
-		temp = ADC;
 		
-		if(temp >=(MAX)){
-			PORTB = 0xFF;
-		}else if(temp >=(7*MAX /8)){
-			PORTB = 0x7F;
-		}else if(temp >=(6*MAX /8)){
-			PORTB = 0x3F;
-		}else if(temp >=(5*MAX /8)){
-			PORTB = 0x1F;
-		}else if(temp >=(4*MAX /8)){
-			PORTB = 0x0F;
-		}else if(temp >=(3*MAX /8)){
-			PORTB = 0x07;
-		}else if(temp >=(2*MAX /8)){
-			PORTB = 0x03;
-		}else{
-			PORTB = 0x01;
-		}
 		
-			
+		AD_convert = ADC;
+		PORTB = (char)AD_convert;
+		PORTD = (char)(AD_convert >> 8);
 	}
 	return 1;
 

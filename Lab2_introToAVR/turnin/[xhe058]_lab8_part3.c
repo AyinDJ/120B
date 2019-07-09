@@ -62,22 +62,10 @@ int main(void) {
 	while (1) {
 		temp = ADC;
 		
-		if(temp >=(MAX)){
-			PORTB = 0xFF;
-		}else if(temp >=(7*MAX /8)){
-			PORTB = 0x7F;
-		}else if(temp >=(6*MAX /8)){
-			PORTB = 0x3F;
-		}else if(temp >=(5*MAX /8)){
-			PORTB = 0x1F;
-		}else if(temp >=(4*MAX /8)){
-			PORTB = 0x0F;
-		}else if(temp >=(3*MAX /8)){
-			PORTB = 0x07;
-		}else if(temp >=(2*MAX /8)){
-			PORTB = 0x03;
-		}else{
+		if(temp >=(MAX/2)){
 			PORTB = 0x01;
+		}else{
+			PORTB = 0x00;
 		}
 		
 			
