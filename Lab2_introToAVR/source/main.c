@@ -12,16 +12,18 @@
 #include "simAVRHeader.h"
 #endif
 #include <avr/interrupt.h>
-//enum States {start, Init, INC, DEC, Wait, Reset}temp;
+enum States {Start, Init, On, Off}temp;
 //#include "../header/io.h"
 //#include "io.c"
 //void TimerISR();
 //void TimerOff();
 //void TimerOn();
 //void TimerSet(unsigned long M);
-//void Tick();
-void ADC_init();
-
+void Tick();
+//void ADC_init();
+void set_PWM();
+void PWM_on();
+void PWM_off();
 
 
 //volatile unsigned char TimerFlag = 0;
@@ -32,8 +34,7 @@ void ADC_init();
 //unsigned char i = 0x00;
 //unsigned char c = '0';
 //unsigned short AD_convert = 0x00;	
-unsigned short MAX = 0xFF;
-unsigned short temp = 0x00;
+
 
 
 int main(void) {
@@ -44,8 +45,9 @@ int main(void) {
 	PORTA = 0xFF;
 	PORTB = 0x00;
 	//PORTD = 0x00;
+	state = Start;
 	
-	ADC_init();
+	//ADC_init();
 	//LCD_init();
 	
 	//temp = start;
@@ -60,25 +62,7 @@ int main(void) {
 	//PORTB = tmpB;
 	
 	while (1) {
-		temp = ADC;
-		
-		if(temp >=(MAX)){
-			PORTB = 0xFF;
-		}else if(temp >=(7*MAX /8)){
-			PORTB = 0x7F;
-		}else if(temp >=(6*MAX /8)){
-			PORTB = 0x3F;
-		}else if(temp >=(5*MAX /8)){
-			PORTB = 0x1F;
-		}else if(temp >=(4*MAX /8)){
-			PORTB = 0x0F;
-		}else if(temp >=(3*MAX /8)){
-			PORTB = 0x07;
-		}else if(temp >=(2*MAX /8)){
-			PORTB = 0x03;
-		}else{
-			PORTB = 0x01;
-		}
+		Tick();
 		
 			
 	}
@@ -86,11 +70,103 @@ int main(void) {
 
 }
 
+void set_PWN(double frequency){
+	static double current_frequency;
+	if(frequency != current_frequency){
+		if(!frequency){
+			TCCR3B &= 0x80;
+		}else{
+			TCCR3B |=0x03;
+		}
+		if(frequency < 0.954){
+			OCR3A = 0xFFFF;
+		}else if (frequency>31250){
+			OCR3A = 0x0000;
+		}else{
+			OCR3A = (short)(8000000 / (128 * frequency))-1;
+		}
+		TCNT3 = 0;
+		current_frequency = frequency;
+	}
+}
+
+void PWM_on(){
+	TCCR3A = (1<<COM3A0);
+	TCCR3B = (1<<WGM32) | (1<<CS31) | (1<<CS30);
+	set_PWM(0);
+}
+
+void PWM_off(){
+	TCCR3A = 0x00;
+	TCCR3B = 0x00;
+}
+
+void Tick(){
+	switch(temp){
+		case Start:{
+			temp = Init;
+			break;
+		}
+		
+		case Init:{
+			set_PWM(0);
+			if((~PINA & 0x07)!= 0x00){
+				temp = On;
+				break;
+			}else{
+				temp = Init;
+				break;
+			}
+		}
+		
+		case On:{
+			if((~PINA & 0x07) != 0x00){
+				temp = On;
+				break;
+			}else if((~PINA & 0x07) != 0x03){
+				temp = Off;
+				break;
+			}else if((~PINA & 0x07) != 0x05){
+				temp = Off;
+				break;
+			}else if((~PINA & 0x07) != 0x06){
+				temp = Off;
+				break;
+			}else if((~PINA & 0x07) != 0x07){
+				temp = Off;
+				break;
+			}else{
+				temp = Off;
+				break;
+			}
+		}
+		
+		case Off:{
+			set_PWM(0);
+			temp = Init;
+			break;
+		}
+		
+		default:
+		break;
+		
+	}
+	
+	switch(temp){
+		case On:{
+			if (()
+		}
+	}
+	
+}
+
+
+/*
 void ADC_init(){
 	ADCSRA |= (1 << ADEN) | (1 <<ADSC) | (1 << ADATE);
 }
 
-/*
+
 void TimerOn() {
 	TCCR1B = 0x0B;
 	OCR1A = 125;
