@@ -12,7 +12,9 @@
 #include "simAVRHeader.h"
 #endif
 #include <avr/interrupt.h>
-enum States {Start, Init, On, Off}temp;
+enum States {Start, Init, INC, DEC, Wait, Reset}temp;
+double music[9] = {2616.3, 2936.6, 3296.3, 3492.3, 3920.0, 4400.0,
+						4938.8, 5232.5, 0};
 //#include "../header/io.h"
 //#include "io.c"
 //void TimerISR();
@@ -21,7 +23,7 @@ enum States {Start, Init, On, Off}temp;
 //void TimerSet(unsigned long M);
 void Tick();
 //void ADC_init();
-void set_PWM();
+void set_PWM(double frequency);
 void PWM_on();
 void PWM_off();
 
@@ -34,6 +36,8 @@ void PWM_off();
 //unsigned char i = 0x00;
 //unsigned char c = '0';
 //unsigned short AD_convert = 0x00;	
+unsigned char counter = 0;
+unsigned char flag = 0;
 
 
 
@@ -47,7 +51,6 @@ int main(void) {
 	//PORTD = 0x00;
 	temp = Start;
 	
-	PWM_on();
 	
 	//ADC_init();
 	//LCD_init();
@@ -111,8 +114,14 @@ void Tick(){
 		}
 		
 		case Init:{
-			if((~PINA & 0x07)!= 0x00){
-				temp = On;
+			if((~PINA & 0x01) == 0x01){
+				temp = Reset;
+				break;
+			}else if((~PINA & 0x02) == 0x02){
+				temp = INC;
+				break;
+			}else if((~PINA & 0x04) == 0x04){
+				temp = DEC;
 				break;
 			}else{
 				temp = Init;
@@ -120,53 +129,54 @@ void Tick(){
 			}
 		}
 		
-		case On:{
-			if((~PINA & 0x07) != 0x00){
-				temp = On;
+		case INC:{
+			counter++;
+			if(counter > 7){
+				counter = 7;
+				temp = Wait;
 				break;
 			}else{
-				temp = Off;
+				temp = Wait;	
 				break;
 			}
 		}
 		
-		case Off:{
-			temp = Init;
-			break;
-		}
-		
-		default:
-		break;
-		
-	}
-		
-	
-	switch(temp){
-		case Start:{
-			break;
-		}
-		
-		case Init:{
-			set_PWM(0);
-			break;
-		}
-		
-		case On:{
-			if((~PINA & 0x07) == 0x01){
-				set_PWM(2616.3);
+		case DEC:{
+			counter--;
+			if(counter < 0){
+				counter = 0;
+				temp = Wait;
 				break;
-			}else if((~PINA & 0x07) == 0x02){
-				set_PWM(2936.6);
-				break;
-			}else if((~PINA & 0x07) == 0x04){
-				set_PWM(3296.3);
+			}else{
+				temp = Wait;	
 				break;
 			}
 		}
 		
-		case Off:{
-			set_PWM(0);
-			break;
+		case Wait:{
+			if ((~PINA & 0x07) == 0x00){
+				temp = Init;
+				set_PWM(music[counter]);
+				break;
+			}else{
+				set_PWM(music[counter]);
+				temp = Wait;
+				break;
+			}
+		}
+		
+		case Reset:{
+			if(flag == 1){
+				PWM_off();
+				flag = 0;
+				temp = Wait;
+				break;
+			}else if (flag == 0){
+				PWM_on();
+				flag = 1;
+				temp = Wait;
+				break;
+			}
 		}
 		
 		default:
