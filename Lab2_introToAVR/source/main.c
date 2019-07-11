@@ -13,23 +13,23 @@
 #endif
 #include <avr/interrupt.h>
 enum States {Start, Init, On, Off}temp;
-//#include "../header/io.h"
-//#include "io.c"
-//void TimerISR();
-//void TimerOff();
-//void TimerOn();
-//void TimerSet(unsigned long M);
+#include "../header/io.h"
+#include "io.c"
+void TimerISR();
+void TimerOff();
+void TimerOn();
+void TimerSet(unsigned long M);
 void Tick();
 //void ADC_init();
-void set_PWM();
-void PWM_on();
-void PWM_off();
+//void set_PWM();
+//void PWM_on();
+//void PWM_off();
 
 
-//volatile unsigned char TimerFlag = 0;
+volatile unsigned char TimerFlag = 0;
 
-//unsigned long _avr_timer_M = 1;
-//unsigned long _avr_timer_cntcurr = 0;
+unsigned long _avr_timer_M = 1;
+unsigned long _avr_timer_cntcurr = 0;
 
 //unsigned char i = 0x00;
 //unsigned char c = '0';
@@ -71,7 +71,7 @@ int main(void) {
 	return 1;
 
 }
-
+/*
 void set_PWM(double frequency){
 	static double current_frequency;
 	if(frequency != current_frequency){
@@ -102,77 +102,10 @@ void PWM_off(){
 	TCCR3A = 0x00;
 	TCCR3B = 0x00;
 }
+*/
 
 void Tick(){
-	switch(temp){
-		case Start:{
-			temp = Init;
-			break;
-		}
-		
-		case Init:{
-			if((~PINA & 0x07)!= 0x00){
-				temp = On;
-				break;
-			}else{
-				temp = Init;
-				break;
-			}
-		}
-		
-		case On:{
-			if((~PINA & 0x07) != 0x00){
-				temp = On;
-				break;
-			}else{
-				temp = Off;
-				break;
-			}
-		}
-		
-		case Off:{
-			temp = Init;
-			break;
-		}
-		
-		default:
-		break;
-		
-	}
-		
 	
-	switch(temp){
-		case Start:{
-			break;
-		}
-		
-		case Init:{
-			set_PWM(0);
-			break;
-		}
-		
-		case On:{
-			if((~PINA & 0x07) == 0x01){
-				set_PWM(2616.3);
-				break;
-			}else if((~PINA & 0x07) == 0x02){
-				set_PWM(2936.6);
-				break;
-			}else if((~PINA & 0x07) == 0x04){
-				set_PWM(3296.3);
-				break;
-			}
-		}
-		
-		case Off:{
-			set_PWM(0);
-			break;
-		}
-		
-		default:
-		break;
-		
-	}
 	
 }
 
@@ -181,7 +114,7 @@ void Tick(){
 void ADC_init(){
 	ADCSRA |= (1 << ADEN) | (1 <<ADSC) | (1 << ADATE);
 }
-
+*/
 
 void TimerOn() {
 	TCCR1B = 0x0B;
@@ -212,92 +145,3 @@ void TimerSet (unsigned long M){
 	_avr_timer_M = M;
 	_avr_timer_cntcurr = _avr_timer_M;
 }
-
-void Tick(){
-	
-	switch(temp){
-		case start:{
-			LCD_Cursor(1);
-			LCD_WriteData('0');
-			temp = Init;
-			break;
-		}
-		
-		case Init:{
-			if((~PINA & 0x03) == 0x01){
-				temp = INC;￼
-				break;
-			}else if ((~PINA & 0x03) == 0x02){
-				temp = DEC;
-				break;
-			}else if ((~PINA & 0x03) == 0x03){
-				temp = Reset;
-				break;
-			}else{
-				temp = Init;
-				break;
-			}
-		}
-		
-		case INC:{
-			if(i>=9){
-				i=9;
-			}else{
-				++i;
-			}
-			LCD_Cursor(1);
-			LCD_WriteData(i+'0');
-			temp = Wait;
-			break;
-		}
-		
-		case DEC:{
-			if(i<=0){
-				i=0;
-			}else{
-				--i;
-			}
-			LCD_Cursor(1);
-			LCD_WriteData(i+'0');
-			temp = Wait;
-			break;
-		}
-		
-		case Wait:{
-			if((~PINA & 0x03) == 0x01){
-				temp = INC;￼
-				break;
-			}else if((~PINA & 0x03) == 0x02){
-				temp = DEC;
-				break;
-			}else if((~PINA & 0x03) == 0x03){
-				temp = Reset;
-				break;
-			}else{
-				temp = Wait;
-				break;
-			}
-		}
-		
-		case Reset:{		
-			i = 0;
-			LCD_Cursor(1);
-			LCD_WriteData(i + '0');
-			
-			if((~PINA & 0x03) == 0x00){
-				temp = Init;
-				break;
-			}else{
-				temp = Reset;
-				break;
-			}
-			
-			
-		}
-		
-		default:
-		break;
-	}
-	
-}
- */
