@@ -14,6 +14,7 @@
 #include <avr/interrupt.h>
 enum ThreeLEDsSM {T_Start, LED1, LED2, LED3} T_temp;
 enum BlinkingLEDSM{B_Start, On, Off} B_temp;
+enum SpeakerSM{S_Start, On_S, Off_S, Wait} S_temp;
 enum CombineLEDsSM{C_Start, Output} C_temp;
 #include "../header/io.h"
 #include "io.c"
@@ -23,6 +24,7 @@ void TimerOn();
 void TimerSet(unsigned long M);
 void Tick_T();
 void Tick_B();
+void Tick_S();
 void Tick_C();
 //void ADC_init();
 //void set_PWM();
@@ -33,6 +35,9 @@ unsigned char LEDs = 0x00;
 unsigned short count_T = 0x00;
 unsigned char Blink = 0x00;
 unsigned short count_B = 0x00;
+unsigned char Speaker = 0x00;
+unsigned short count_S = 0x00;
+unsigned char button = 0x00;
 unsigned char Out = 0x00;
 
 
@@ -51,18 +56,20 @@ unsigned long _avr_timer_cntcurr = 0;
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-    //DDRA = 0x00;
+    DDRA = 0x00;
 	DDRB = 0xFF;
 	//DDRD = 0xFF;
-	//PORTA = 0xFF;
+	PORTA = 0xFF;
 	PORTB = 0x00;
 	//PORTD = 0x00;
 	T_temp = T_Start;
 	B_temp = B_Start;
+	S_temp = S_Start;
 	C_temp = C_Start;
 	
 	count_T = 0;
 	count_B = 0;
+	count_S = 0;
 	
 	
 	//PWM_on();
@@ -84,6 +91,7 @@ int main(void) {
 	while (1) {
 		Tick_T();
 		Tick_B();
+		Tick_S();
 		Tick_C();
 		
 		while (!TimerFlag);
@@ -146,7 +154,6 @@ void Tick_T(){
 				break;
 			}
 		}
-		
 		case LED2:{
 			LEDs = 0x02;
 			if (count_T <30){
@@ -220,6 +227,66 @@ void Tick_B(){
 	
 }
 
+void Tick_S(){
+	switch(S_temp){
+		case S_Start:{
+			S_temp = Wait;
+			count_S = 0;
+			break;
+		}
+		
+		case On_S:{
+			Speaker = 0x10;
+			if ((count_S < 2) && ((~PINA & 0x04) == 0x04)){
+				S_temp = On_S;
+				count_S++;
+				break;
+			}else if ((~PINA & 0x04) == 0x04){
+				S_temp = Off_S;
+				count_S = 0;
+				break;
+			}else{
+				S_temp = Wait;
+				break;
+			}
+		}
+		
+		case Off_S:{
+			Speaker = 0x00;
+			if ((count_S < 2) && ((~PINA & 0x04) == 0x04)){
+				S_temp = Off_S;
+				count_S++;
+				break;
+			}else if ((~PINA & 0x04) == 0x04){
+				S_temp = On_S;
+				count_S = 0;
+				break;
+			}else{
+				S_temp = Wait;
+				break;
+			}
+		}
+		
+	
+		case Wait:{
+			Speaker = 0x00;
+			count_S = 0x00;
+			if ((~PINA & 0x04) == 0x04){
+				S_temp = On_S;
+				break;
+			}else{
+				S_temp = Wait;
+				break;
+			}
+		}
+		
+		default:
+		break;
+		
+	}
+	
+}
+
 void Tick_C(){
 	
 	switch(C_temp){
@@ -229,10 +296,13 @@ void Tick_C(){
 		}
 		
 		case Output:{
-			Out = Blink | LEDs;
+			Out = Blink | Speaker | LEDs;
 			PORTB = Out;
 			break;
 		}
+		
+		default:
+		break;
 	}	
 	
 	

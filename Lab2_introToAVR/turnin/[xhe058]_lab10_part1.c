@@ -136,7 +136,7 @@ void Tick_T(){
 		
 		case LED1:{
 			LEDs = 0x01;
-			if (count_T<30){
+			if (count_T<100){
 				T_temp = LED1;
 				count_T++;
 				break;
@@ -149,7 +149,7 @@ void Tick_T(){
 		
 		case LED2:{
 			LEDs = 0x02;
-			if (count_T <30){
+			if (count_T <100){
 				T_temp	= LED2;
 				count_T++;
 				break;
@@ -162,7 +162,7 @@ void Tick_T(){
 		
 		case LED3:{
 			LEDs = 0x04;
-			if (count_T <30){
+			if (count_T <100){
 				T_temp	= LED3;
 				count_T++;
 				break;
